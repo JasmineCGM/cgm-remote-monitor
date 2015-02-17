@@ -35,9 +35,15 @@ var app = {}, browserSettings = {}, browserStorage = $.localStorage;
         , data = []
         , audio = document.getElementById('audio')
         , alarmInProgress = false
-        , currentAlarmType = null
-        , alarmSound = 'alarm.mp3'
-        , urgentAlarmSound = 'alarm2.mp3';
+        , currentAlarmType = null,
+        alarmSound = 'alarm.mp3',
+        urgentAlarmSound = 'alarm2.mp3',
+        LowLowAlarmSound = 'LowLowAlarm.mp3',
+        LowAlarmSound = 'LowAlarm.mp3',
+        LowFallingAlarmSound = 'LowFallingAlarm.mp3',
+        HighAlarmDaySound = 'HighAlarmDay.mp3',
+        HighAlarmNightSound = 'HighAlarmNight.mp3',
+        HighRiseAlarmSound = 'HighRiseAlarm.mp3';
 
     var jqWindow
         , tooltip
@@ -1385,46 +1391,80 @@ var app = {}, browserSettings = {}, browserStorage = $.localStorage;
 
         //with predicted alarms, latestSGV may still be in target so to see if the alarm
         //  is for a HIGH we can only check if it's >= the bottom of the target
-        function isAlarmForHigh() {
-            return latestSGV.y >= app.thresholds.bg_target_bottom;
-        }
+       // function isAlarmForHigh() {
+       //     return latestSGV.y >= app.thresholds.bg_target_bottom;
+        //}
 
         //with predicted alarms, latestSGV may still be in target so to see if the alarm
         //  is for a LOW we can only check if it's <= the top of the target
-        function isAlarmForLow() {
-            return latestSGV.y <= app.thresholds.bg_target_top;
-        }
+       // function isAlarmForLow() {
+       //     return latestSGV.y <= app.thresholds.bg_target_top;
+        //}
 
-        socket.on('alarm', function () {
-            console.info('alarm received from server');
-            var enabled = (isAlarmForHigh() && browserSettings.alarmHigh) || (isAlarmForLow() && browserSettings.alarmLow);
-            if (enabled) {
-                console.log('Alarm raised!');
-                currentAlarmType = 'alarm';
-                generateAlarm(alarmSound);
-            } else {
-                console.info('alarm was disabled locally', latestSGV.y, browserSettings);
-            }
+    socket.on('alarm', function () {
+        if (browserSettings.alarmHigh) {
+            console.log("Alarm raised!");
+            currentAlarmType = 'alarm';
+            generateAlarm(alarmSound);
+        }
+        brushInProgress = false;
+        updateChart(false);
+    });
+    socket.on('urgent_alarm', function () {
+        if (browserSettings.alarmLow) {
+            console.log("Urgent alarm raised!");
+            currentAlarmType = 'urgent_alarm';
+            generateAlarm(urgentAlarmSound);
+        }
+        brushInProgress = false;
+        updateChart(false);
+        });
+         socket.on('LowLowAlarm', function () {
+            console.log("LowLowAlarm raised!");
+            currentAlarmType = 'LowLowAlarm';
+            generateAlarm(LowLowAlarmSound);
             brushInProgress = false;
             updateChart(false);
         });
-        socket.on('urgent_alarm', function () {
-            console.info('urgent alarm received from server');
-            var enabled = (isAlarmForHigh() && browserSettings.alarmUrgentHigh) || (isAlarmForLow() && browserSettings.alarmUrgentLow);
-            if (enabled) {
-                console.log('Urgent alarm raised!');
-                currentAlarmType = 'urgent_alarm';
-                generateAlarm(urgentAlarmSound);
-            } else {
-                console.info('urgent alarm was disabled locally', latestSGV.y, browserSettings);
-            }
+        socket.on('LowAlarm', function () {
+            console.log("LowAlarm raised!");
+            currentAlarmType = 'LowAlarm';
+            generateAlarm(LowAlarmSound);
             brushInProgress = false;
             updateChart(false);
         });
-        socket.on('clear_alarm', function () {
-            if (alarmInProgress) {
-                console.log('clearing alarm');
-                stopAlarm();
+        socket.on('LowFallingAlarm', function () {
+            console.log("LowFallingAlarm raised!");
+            currentAlarmType = 'LowFallingAlarm';
+            generateAlarm(LowFallingAlarmSound);
+            brushInProgress = false;
+            updateChart(false);
+        });
+        socket.on('HighAlarmDay', function () {
+            console.log("HighAlarmDay raised!");
+            currentAlarmType = 'HighAlarmDay';
+            generateAlarm(HighAlarmDaySound);
+            brushInProgress = false;
+            updateChart(false);
+        });
+        socket.on('HighAlarmNight', function () {
+            console.log("HighAlarmNight raised!");
+            currentAlarmType = 'HighAlarmNight';
+            generateAlarm(HighAlarmNightSound);
+            brushInProgress = false;
+            updateChart(false);
+        });
+        socket.on('HighRiseAlarm', function () {
+            console.log("HighRiseAlarm raised!");
+            currentAlarmType = 'HighRiseAlarm';
+            generateAlarm(HighRiseAlarmSound);
+            brushInProgress = false;
+            updateChart(false);
+        });
+    socket.on('clear_alarm', function () {
+        if (alarmInProgress) {
+            console.log('clearing alarm');
+            stopAlarm();
             }
         });
 
